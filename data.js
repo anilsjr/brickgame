@@ -9,7 +9,7 @@ function getPlayerName() {
 
         // Set a default name if
         // none provided
-        playerName = "Anonymous";
+        playerName = "Guest";
     }
 }
 

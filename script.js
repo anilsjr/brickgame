@@ -134,64 +134,63 @@ const obstacle = {
     width: OBSTACLE_WIDTH,
     x: OBSTACLE_START_X,
     y: OBSTACLE_START_Y,
+    image: new Image(), // Declare the image object
     draw: function (x, y) {
-        ctx.fillStyle = "#555";
-        ctx.beginPath();
-        ctx.fillRect(x, y, this.width,
-            this.height)
-        ctx.closePath();
+        this.image.src = 'img/brik.png'; // Set the image source
+        ctx.drawImage(this.image, x, y, this.width, this.height); // Draw the image
     },
+
     create: function () {
-        for (let i = 0;
-            i < LOC.length; i++)
-            this.draw(LOC[i][0], LOC[i][1])
+        for (let i = 0; i < LOC.length; i++)
+            this.draw(LOC[i][0], LOC[i][1]);
     },
     destroy: function (x, y) {
-        ctx.clearRect(x, y, OBSTACLE_WIDTH,
-            OBSTACLE_HEIGHT);
+        ctx.clearRect(x, y, OBSTACLE_WIDTH, OBSTACLE_HEIGHT);
     },
     createGrid: function () {
         for (let i = 0; i < OBSTACLE_ROW_COUNT; i++) {
-            this.x = OBSTACLE_START_X
+            this.x = OBSTACLE_START_X;
             for (let i = 0; i < OBSTACLE_COL_COUNT; i++) {
-                LOC.push([this.x, this.y])
-                this.x = this.x + this.width
-                    + OBSTACLE_PADDING
+                LOC.push([this.x, this.y]);
+                this.x = this.x + this.width + OBSTACLE_PADDING;
             }
-            this.y = this.y + this.height
-                + OBSTACLE_PADDING
+            this.y = this.y + this.height + OBSTACLE_PADDING;
         }
-        this.y = OBSTACLE_START_Y
+        this.y = OBSTACLE_START_Y;
     }
-}
+};
+
+
+
+
+
 const ball = {
     x: canvas.width / 2,
     y: canvas.height / 2,
-    radius: BALL_RADIUS,
+    radius: BALL_RADIUS*2,
     vx: BALL_VX,
     vy: BALL_VY,
+    img: new Image(),
     draw: function () {
-        ctx.beginPath();
-        ctx.fillStyle = "#000000";
-        ctx.arc(this.x, this.y, this.radius,
-            0, Math.PI * 2, true);
-        ctx.fill();
-        ctx.closePath();
+        if (!this.img.src) {
+            this.img.src = `img/ball.png`; // Set your PNG file path
+        }
+        const imgSize = this.radius * 2; // Diameter of the ball
+        ctx.drawImage(this.img, this.x - this.radius, this.y - this.radius, imgSize, imgSize);
     },
     move: function () {
         this.x += this.vx;
         this.y += this.vy;
 
         // Canvas left and right limit
-        if (this.x + this.radius >= CANVAS_WIDTH
-            || this.x - this.radius <= 0)
+        if (this.x + this.radius >= CANVAS_WIDTH || this.x - this.radius <= 0)
             this.vx = -this.vx;
 
         // Canvas bottom
         if (this.y + this.radius >= CANVAS_HEIGHT) {
             this.vx = 0;
             this.vy = 0;
-            FLAG = 1
+            FLAG = 1;
         }
 
         // Canvas top
@@ -199,28 +198,25 @@ const ball = {
             this.vy = -this.vy;
 
         // Detecting collision with paddle
-        if ((this.x >= X) && (this.x <= X +
-            PADDLE_WIDTH)
+        if ((this.x >= X) && (this.x <= X + PADDLE_WIDTH)
             && this.y + this.radius < CANVAS_HEIGHT
             && this.y + this.radius >= CANVAS_HEIGHT - PADDLE_HEIGHT)
-            this.vy = -this.vy
+            this.vy = -this.vy;
 
         // Detecting collision of ball with obstacle
         for (let i = 0; i < LOC.length; i++) {
-            if (this.x >= LOC[i][0] && this.x <= LOC[i][0]
-                + OBSTACLE_WIDTH && this.y - this.radius >= LOC[i][1]
+            if (this.x >= LOC[i][0] && this.x <= LOC[i][0] + OBSTACLE_WIDTH
+                && this.y - this.radius >= LOC[i][1]
                 && this.y - this.radius <= LOC[i][1] + OBSTACLE_HEIGHT) {
                 obstacle.destroy(LOC[i][0], LOC[i][1]);
                 LOC.splice(i, 1);
-                this.vy = -this.vy
+                this.vy = -this.vy;
                 CURRENT_SCORE += 1;
-                document.getElementById("curr_score").innerText =
-                    `YOUR SCORE : ${CURRENT_SCORE}`
-                this.vy *= 1.005
-                this.vx *= 1.005
+                document.getElementById("curr_score").innerText = `YOUR SCORE : ${CURRENT_SCORE}`;
+                this.vy *= 1.005;
+                this.vx *= 1.005;
             }
         }
-
     }
 }
 const paddle = {
@@ -228,6 +224,7 @@ const paddle = {
     y: canvas.height - PADDLE_HEIGHT,
     width: PADDLE_WIDTH,
     height: PADDLE_HEIGHT,
+    
     draw: function () {
         ctx.fillStyle = "#000000";
         ctx.beginPath();
@@ -259,9 +256,56 @@ function draw_on_canvas() {
         ball.vx = BALL_VX;
         ball.vy = BALL_VY;
         clearInterval(PLAYGAME);
-        if (CURRENT_SCORE > HIGH_SCORE)
-            HIGH_SCORE = CURRENT_SCORE
+        
+        
+        if (CURRENT_SCORE > HIGH_SCORE){
+            HIGH_SCORE = CURRENT_SCORE;
+            const count = 200,
+  defaults = {
+    origin: { y: 0.7 },
+  };
+
+function fire(particleRatio, opts) {
+  confetti(
+    Object.assign({}, defaults, opts, {
+      particleCount: Math.floor(count * particleRatio),
+    })
+  );
+}
+
+fire(0.25, {
+  spread: 26,
+  startVelocity: 55,
+});
+
+fire(0.2, {
+  spread: 60,
+});
+
+fire(0.35, {
+  spread: 100,
+  decay: 0.91,
+  scalar: 0.8,
+});
+
+fire(0.1, {
+  spread: 120,
+  startVelocity: 25,
+  decay: 0.92,
+  scalar: 1.2,
+});
+
+fire(0.1, {
+  spread: 120,
+  startVelocity: 45,
+});
+
+
+} 
+        
+        
         CURRENT_SCORE = 0
+
         init();
     }
     else {
